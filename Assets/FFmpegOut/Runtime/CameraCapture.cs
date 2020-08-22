@@ -39,7 +39,7 @@ namespace FFmpegOut
             set { _frameRate = value; }
         }
 
-        [SerializeField] bool _isStream = true;
+        [SerializeField, Header("Streaming")] bool _isStream = true;
         
         public bool isStream
         {
