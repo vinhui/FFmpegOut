@@ -39,6 +39,40 @@ namespace FFmpegOut
             set { _frameRate = value; }
         }
 
+        [SerializeField] bool _isStream = true;
+        
+        public bool isStream
+        {
+            get { return _isStream; }
+            set { _isStream = value; }
+        }
+
+        [SerializeField] string _rtmpUrl = "rtmp://live.twitch.tv/app/my-stream-key";
+
+        public string rtmpUrl
+        {
+            get { return _rtmpUrl; }
+            set { _rtmpUrl = value; }
+        }
+        
+        [SerializeField] int _bitrate = 3000;
+
+        public int bitrate
+        {
+            get { return _bitrate; }
+            set { _bitrate = value; }
+        }
+        
+        [SerializeField] CompressionSpeed _compressionSpeed = CompressionSpeed.UltraFast;
+
+        public CompressionSpeed compressionSpeed
+        {
+            get { return _compressionSpeed; }
+            set { _compressionSpeed = value; }
+        }
+
+        
+
         #endregion
 
         #region Private members
@@ -145,12 +179,30 @@ namespace FFmpegOut
                 }
 
                 // Start an FFmpeg session.
-                _session = FFmpegSession.Create(
-                    gameObject.name,
-                    camera.targetTexture.width,
-                    camera.targetTexture.height,
-                    _frameRate, preset
-                );
+                var targetTexture = camera.targetTexture;
+                if (_isStream)
+                {
+                    _session = FFmpegSession.CreateWithArguments(
+                        "-re"
+                        + " -y -f rawvideo -vcodec rawvideo -pixel_format rgba"
+                        + " -colorspace bt709"
+                        + " -video_size " + targetTexture.width + "x" + targetTexture.height
+                        + " -framerate " + _frameRate
+                        + " -loglevel warning -i - " + preset.GetOptions()
+                        + " -preset " + _compressionSpeed.ToString().ToLower() // compression preset
+                        + $" -b:v {_bitrate}k -maxrate {_bitrate}k -bufsize {_bitrate * 2}k" // Video bitrates
+                        + $" -f flv \"{_rtmpUrl}\""
+                    );
+                }
+                else
+                {
+                    _session = FFmpegSession.Create(
+                        gameObject.name,
+                        targetTexture.width,
+                        targetTexture.height,
+                        _frameRate, preset
+                    );
+                }
 
                 _startTime = Time.time;
                 _frameCount = 0;
