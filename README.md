@@ -1,6 +1,8 @@
 FFmpegOut
 =========
 
+_This fork includes an option to stream a camera view to an rtmp server. This was tested with twitch.tv, others will probably also work._
+
 ![gif](http://i.imgur.com/bkQlFxX.gif)
 
 **FFmpegOut** is a Unity plugin that allows the Unity editor and applications to
